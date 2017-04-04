@@ -10,7 +10,7 @@ apm install git-diff-staged
 
 ## Styles
 
-This plugin extends styles in core package `atom/git-diff`, which is enabled by default.
+This plugin extends styles in core package [git-diff](https://atom.io/packages/git-diff).
 Visual distinction is implemented only with no icons (`Show Icons In Editor Gutter` disabled), 
 i.e. with the left borders and small triangles.
 
@@ -38,9 +38,20 @@ staging it and then undoing the change.
   variation uses the hunk surrounding cursor, if there are changes
   at that position.
   
-Also adds a vim-mode-plus Operator to toggle staging status for a movement:
+Also adds a some vim-mode-plus stuff
 
+Operator to toggle staging status for a movement
 - `git-diff-staged:toggle-staged`
+
+TextObjects to operate with e.g. `toggle-staged` Operator.
+These all work identically.
+- `git-diff-staged:inner-hunk`
+- `git-diff-staged:a-hunk`
+- `git-diff-staged:hunk`
+
+Motions to move forward/backward by hunk(s)
+- `git-diff-staged:move-to-next-hunk`
+- `git-diff-staged:move-to-previous-hunk`
 
 Note that you don't need to save the file to modify the index.
 
@@ -56,8 +67,15 @@ Example keymap:
 
 # vim-mode-plus:
 
-'atom-workspace atom-text-editor.vim-mode-plus:not(.insert-mode)':
-  'g s k': 'git-diff-staged:toggle-staged'
+'atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode':
+  'i h': 'git-diff-staged:inner-hunk'
+  'a h': 'git-diff-staged:a-hunk'
+  'g h': 'git-diff-staged:hunk'
+ 
+'atom-workspace atom-text-editor:not([mini]):not(.insert-mode).vim-mode-plus':
+  'g s s': 'git-diff-staged:toggle-staged'
+  'g s j': 'git-diff-staged:move-to-next-hunk'
+  'g s k': 'git-diff-staged:move-to-previous-hunk'
 ```
 
 ## Caveats
