@@ -14,12 +14,14 @@ This plugin extends styles in core package `atom/git-diff`, which is enabled by 
 Visual distinction is implemented only with no icons (`Show Icons In Editor Gutter` disabled), 
 i.e. with the left borders and small triangles.
 
-Staged changes are indicated with dotted left borders. Staged deletions are marked by
-changing the color of the small triangle.
+Staged changes are indicated with dotted left borders.
+Staged deletions are marked by changing the color of the triangle.
 
-Inconsistencies between index and current file are marked with white color and dotted thinner
-border. This usually is a situation that should be corrected by toggling the staged state.
-These situations can be done by making a change, staging it and then undoing the change.
+Inconsistencies between index and current file are marked
+with white color and dotted thinner border.
+You can correct these by toggling the staged state.
+This kind of phenomenom can be reproduced by making a change,
+staging it and then undoing the change.
 
 ## Commands
 
@@ -27,8 +29,8 @@ These situations can be done by making a change, staging it and then undoing the
 
   Adds all changed lines within selection to index, unless
   all changed lines already are in index, in which case
-  they are removed from index. If selection contains no changes,
-  staged or not, nothing is done.
+  they are removed from index.
+  If selection contains no changes, staged or not, nothing is done.
   
 - `git-diff-staged:toggle-hunk-at-cursor`
 
@@ -36,7 +38,7 @@ These situations can be done by making a change, staging it and then undoing the
   variation uses the hunk surrounding cursor, if there are changes
   at that position.
   
-Also adds a vim-mode-plus Operation to toggle staging status for a movement:
+Also adds a vim-mode-plus Operator to toggle staging status for a movement:
 
 - `git-diff-staged:toggle-staged`
 
@@ -51,13 +53,18 @@ Example keymap:
 'atom-workspace atom-text-editor':
   'ctrl-alt-shift-cmd-s': 'git-diff-staged:toggle-selected'
   'ctrl-alt-shift-cmd-h': 'git-diff-staged:toggle-hunk-at-cursor'
+
+# vim-mode-plus:
+
+'atom-workspace atom-text-editor.vim-mode-plus:not(.insert-mode)':
+  'g s k': 'git-diff-staged:toggle-staged'
 ```
 
-Example keymap (vmp):
-```
-'atom-workspace atom-text-editor.vim-mode-plus:not(.insert-mode)':
-  's i f': 'git-diff-staged:toggle-staged'
-```
+## Caveats
+
+Indicator of modified lines makes no difference for lines that
+are not in index and lines that are in index but are different
+from the current buffer.
 
 ## Configuration
 
@@ -65,8 +72,8 @@ You may customize the git command path with `git-diff-staged.gitPath`.
 If you are using `git-plus` package, it's configuration
 `git-plus.general.gitPath` is used (unless you want to override it).
 
-By default preceding deletions are included when the first line to staged is
-a modification. You can prevent that with `git-diff-staged.ignorePrecedingDeletion`.
+By default preceding deletions are included when the first line to staged is a modification.
+You can prevent that with `git-diff-staged.ignorePrecedingDeletion`.
 
 ## Contributing
 
@@ -75,5 +82,4 @@ critically observed. Creating an issue before creating a pull request is
 good practice.
 
 Particularly help with styles is greatly appreciated.
-I don't have the necessary skills to get good defaults
-that work with various themes.
+I don't have the necessary skills to get good defaults that work with various themes.
