@@ -13,13 +13,26 @@ atom-text-editor div.gutter {
     &.git-line-removed:before {
       border-left-color: pink;
     }
+    &.git-index-partial:before {
+      @size: 4px;
+      position: absolute;
+      left: 0;
+      bottom: -@size;
+      height: 0;
+      width: 0;
+      content: " ";
+      border: solid transparent;
+      border-left-color: white;
+      border-width: @size;
+      margin-top: -@size;
+      pointer-events: none;
+    }
+  }
+  .line-number.not-staged.git-index-added.git-line-modified {
+      border-left-color: @syntax-color-added;
   }
   // these styles are for unconventional situations
   // e.g. there is stuff in index that does not correspond current text
-  .line-number.not-staged.git-index-added.git-line-modified {
-      border-top: 1px dotted @syntax-color-removed;
-      border-left-color: @syntax-color-added;
-  }
   .line-number.not-staged:not(.git-line-added):not(.git-line-removed):not(.git-line-modified) {
     &.git-index-added, &.git-index-modified {
       border-left: 1px dotted white;

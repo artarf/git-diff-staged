@@ -1,10 +1,6 @@
 {CompositeDisposable} = require 'atom'
 {repositoryForPath} = require './helpers'
 
-getDiffs = (repository, path, text)->
-  repo = repository.getRepo(path)
-  repo.getLineDiffs(repo.relativize(path), text, useIndex: true)
-
 module.exports =
 class GitDiffStagedView
   constructor: (@editor)->
@@ -45,19 +41,29 @@ class GitDiffStagedView
     @removeDecorations()
     if @repository and path = @editor?.getPath()
       text = @editor.getText()
-      if diffs = getDiffs @repository, path, text
-        @addDecorations(diffs)
+      repo = @repository.getRepo(path)
+      file = repo.relativize(path)
+      if diffs = repo.getLineDiffs(file, text, useIndex: true)
+        indexText = repo.getIndexBlob(file)
+        indexToHeadDiffs = repo.getLineDiffs(file, indexText, useIndex: false)
+        @addDecorations(diffs, indexToHeadDiffs)
 
-  addDecorations: (diffs)->
-    for {newStart, oldLines, newLines} in diffs
+  addDecorations: (diffs, indexToHeadDiffs)->
+    indexToHead = []
+    for d in indexToHeadDiffs or []
+      end = d.newLines or 1
+      indexToHead[i + d.newStart] = d for i in [0...end]
+    for {oldStart, newStart, oldLines, newLines} in diffs
       startRow = newStart - 1
       endRow = newStart + newLines - 1
       if oldLines is 0 and newLines > 0
-        @markRange(startRow, endRow, 'git-index-added')
+        if indexToHead[oldStart]?.newLines is 0
+          @markRange(startRow - 1, startRow, 'git-index-partial')
+        @markRange(startRow, endRow, 'not-staged git-index-added')
       else if newLines is 0 and oldLines > 0
-        @markRange(startRow, startRow+1, 'git-index-removed')
+        @markRange(startRow, startRow+1, 'not-staged git-index-removed')
       else
-        @markRange(startRow, endRow, 'git-index-modified')
+        @markRange(startRow, endRow, 'not-staged git-index-modified')
     return
 
   removeDecorations: ->
@@ -66,5 +72,5 @@ class GitDiffStagedView
 
   markRange: (startRow, endRow, klass)->
     marker = @editor.markBufferRange([[startRow, 0], [endRow, 0]], invalidate: 'never')
-    @editor.decorateMarker(marker, type: 'line-number', class: "not-staged " + klass)
+    @editor.decorateMarker(marker, type: 'line-number', class: klass)
     @markers.push(marker)
