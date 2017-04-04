@@ -19,19 +19,20 @@ class GitDiffStagedView
       @removeDecorations()
       @subscriptions.dispose()
 
+    @subscriptions.add atom.commands.add @editor, 'git-diff-staged:update-diffs', @scheduleUpdate
+
     @scheduleUpdate()
 
   subscribeToRepository: ->
     if @repository = repositoryForPath(@editor.getPath())
-      @subscriptions.add @repository.onDidChangeStatuses =>
-        @scheduleUpdate()
+      @subscriptions.add @repository.onDidChangeStatuses @scheduleUpdate
       @subscriptions.add @repository.onDidChangeStatus (changedPath) =>
         @scheduleUpdate() if changedPath is @editor.getPath()
 
   cancelUpdate: ->
     clearImmediate(@immediateId)
 
-  scheduleUpdate: ->
+  scheduleUpdate: =>
     @cancelUpdate()
     @immediateId = setImmediate(@updateDiffs)
 

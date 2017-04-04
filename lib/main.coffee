@@ -67,6 +67,5 @@ toggleLines = (editor, [first, last])->
   toggleStaged(repo.getRepo(file), file, text, first, last, options).then (result)->
     return console.warn 'nothing to do' unless result?
     return console.error result.err.join '' if result.code isnt 0
-    # fake edit to make sure git gutter is updated
-    pos = editor.getCursorBufferPosition()
-    editor.setTextInBufferRange [pos, pos], ''
+    editorElement = atom.views.getView(editor)
+    atom.commands.dispatch(editorElement, 'git-diff-staged:update-diffs')
