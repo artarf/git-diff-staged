@@ -2,7 +2,9 @@
 toggleStaged = GitDiffStagedView = repositoryForPath = null
 
 getGitPath = ->
-  atom.config.get("git-diff-staged.gitPath") ? atom.config.get("git-plus.general.gitPath") ? 'git'
+  git = atom.config.get("git-diff-staged.gitPath")
+  return git if git isnt module.exports.config.gitPath.default
+  atom.config.get("git-plus.general.gitPath") ? 'git'
 
 module.exports =
   vimMode: null
@@ -18,7 +20,7 @@ module.exports =
     gitPath:
       description: "If git is not in your PATH, specify where the executable is"
       type: "string"
-      default: "git"
+      default: "use setting from git-plus package"
 
   activate: ->
     @subscriptions = new CompositeDisposable()
