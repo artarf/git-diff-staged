@@ -36,6 +36,7 @@ atom-text-editor div.gutter {
   .line-number.not-staged:not(.git-line-added):not(.git-line-removed):not(.git-line-modified) {
     &.git-index-added, &.git-index-modified {
       border-left: 1px dotted white;
+      padding-left: ~"calc(0.5em - 2px)";
     }
     &.git-index-removed:before {
       @size: 4px;
