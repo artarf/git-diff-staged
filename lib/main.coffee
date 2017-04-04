@@ -50,8 +50,9 @@ getHunkLines = (editor)->
   file = editor.getPath()
   return unless repo = repositoryForPath(file)
   {row} = editor.getCursorBufferPosition()
-  for diff in repo.getLineDiffs(file, editor.getText()) when diff.newStart is row + 1
-    return [diff.newStart, diff.newStart + diff.newLines]
+  for {newStart, newLines} in repo.getLineDiffs(file, editor.getText()) when -1 < row - newStart < newLines
+    return [newStart, newStart + newLines]
+  [-1, -1]
 
 toggleLines = (editor, [first, last])->
   file = editor.getPath()
