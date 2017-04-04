@@ -1,6 +1,6 @@
 {
   "name": "git-diff-staged",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "main": "./lib/main",
   "description": "Marks lines in the editor gutter that have been staged.",
   "repository": "https://github.com/artarf/git-diff-staged",
