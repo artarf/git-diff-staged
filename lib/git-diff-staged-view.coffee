@@ -3,27 +3,36 @@
 
 module.exports =
 class GitDiffStagedView
-  constructor: (@editor)->
-    @subscriptions = new CompositeDisposable()
-    @decorations = {}
-    @markers = []
+  constructor: (editor)->
+    @reset()
+    @editor = editor
 
     @subscriptions.add(@editor.onDidStopChanging(@updateDiffs))
     @subscriptions.add(@editor.onDidChangePath(@updateDiffs))
 
     @subscribeToRepository()
-    @subscriptions.add atom.project.onDidChangePaths => @subscribeToRepository()
+    @subscriptions.add atom.project.onDidChangePaths @subscribeToRepository
 
-    @subscriptions.add @editor.onDidDestroy =>
-      @cancelUpdate()
-      @removeDecorations()
-      @subscriptions.dispose()
+    @subscriptions.add @editor.onDidDestroy @dispose
 
-    @subscriptions.add atom.commands.add @editor, 'git-diff-staged:update-diffs', @scheduleUpdate
+    editorElement = atom.views.getView(editor)
+    @subscriptions.add atom.commands.add editorElement, 'git-diff-staged:update-diffs', @scheduleUpdate
 
     @scheduleUpdate()
 
-  subscribeToRepository: ->
+  reset: ->
+    @subscriptions = new CompositeDisposable()
+    @decorations = {}
+    @markers = []
+    @immediateId = @repository = @editor = null
+
+  dispose: =>
+    @cancelUpdate()
+    @removeDecorations()
+    @subscriptions?.dispose()
+    @reset()
+
+  subscribeToRepository: =>
     if @repository = repositoryForPath(@editor.getPath())
       @subscriptions.add @repository.onDidChangeStatuses @scheduleUpdate
       @subscriptions.add @repository.onDidChangeStatus (changedPath) =>
