@@ -1,5 +1,7 @@
 {CompositeDisposable} = require 'atom'
 toggleStaged = GitDiffStagedView = repositoryForPath = null
+{diffAtLine, previousDiff, nextDiff} = require "./utils"
+{Point} = require "atom"
 
 getGitPath = ->
   git = atom.config.get("git-diff-staged.gitPath")
@@ -27,8 +29,8 @@ module.exports =
     GitDiffStagedView = require './git-diff-staged-view'
     {repositoryForPath} = require './helpers'
     {toggleStaged} = require './utils'
-    @subscriptions.add atom.workspace.observeTextEditors (editor)->
-      new GitDiffStagedView(editor)
+    @subscriptions.add atom.workspace.observeTextEditors (editor)=>
+      @subscriptions.add new GitDiffStagedView(editor)
     @subscriptions.add atom.commands.add 'atom-text-editor', 'git-diff-staged:toggle-selected', ->
       editor = atom.workspace.getActiveTextEditor()
       toggleLines editor, getLines editor.getSelectedBufferRange()
@@ -46,15 +48,57 @@ module.exports =
       mutateSelection: (selection)->
         toggleLines selection.editor, getLines selection.getBufferRange()
 
+    TextObject = Base.getClass "TextObject"
+    class Hunk extends TextObject
+      @commandPrefix: 'git-diff-staged'
+      @deriveInnerAndA()
+      wise: 'linewise'
+      @registerCommand()
+      getRange: (selection)->
+        editor = atom.workspace.getActiveTextEditor()
+        diffs = getDiffs editor
+        return unless diffs?.length
+        [start, end] = _getHunkLines editor, pos = @getCursorPositionForSelection(selection)
+        return if start is -1
+        @getBufferRangeForRowRange [start-1, end-1]
+    Base.getClass("InnerHunk").registerCommand()
+    Base.getClass("AHunk").registerCommand()
+
+    Motion = Base.getClass "Motion"
+    class MoveToNextHunk extends Motion
+      @commandPrefix: 'git-diff-staged'
+      @registerCommand()
+      jump: true
+      direction: 'next'
+      getPoint: (fromPoint)->
+        editor = atom.workspace.getActiveTextEditor()
+        diffs = getDiffs editor
+        return unless diffs?.length
+        row = fromPoint.row + 1
+        if @direction is 'next'
+          d = nextDiff diffs, row
+          new Point d.newStart - 1, 0
+        else
+          d = previousDiff diffs, row
+          new Point d.newStart - 1, 0
+
+      moveCursor: (cursor)->
+        @moveCursorCountTimes cursor, =>
+          @setBufferPositionSafely(cursor, @getPoint(cursor.getBufferPosition()))
+
+    class MoveToPreviousHunk extends MoveToNextHunk
+      @registerCommand()
+      direction: 'previous'
+
 getLines = ({start, end})-> [start.row + 1, end.row + (end.column > 0)]
 
-getHunkLines = (editor)->
-  file = editor.getPath()
-  return unless repo = repositoryForPath(file)
-  {row} = editor.getCursorBufferPosition()
-  for {newStart, newLines} in repo.getLineDiffs(file, editor.getText()) when -1 < row - newStart < newLines
-    return [newStart, newStart + newLines]
-  [-1, -1]
+getHunkLines = (editor)-> _getHunkLines(editor, editor.getCursorBufferPosition())
+
+getDiffs = (editor)-> repositoryForPath(editor.getPath()).getLineDiffs(editor.getPath(), editor.getText())
+
+_getHunkLines = (editor, {row})->
+  return [-1, -1] unless d = diffAtLine getDiffs(editor), row
+  return [d.newStart, d.newStart + d.newLines - 1]
 
 toggleLines = (editor, [first, last])->
   file = editor.getPath()

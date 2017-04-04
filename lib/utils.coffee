@@ -132,6 +132,14 @@ gitApplyPatchToIndex = (patch, dir, git = 'git')->
     child.stdin.write patch
     child.stdin.end()
 
+nextDiffIndex = (diffs, line)-> diffs.findIndex (d)-> d.newStart > line
+nextDiff = (diffs, line)-> diffs[nextDiffIndex diffs, line] ? diffs[0]
+previousDiff = (diffs, line)->
+  i = nextDiffIndex(diffs, line - 1)
+  if ~i then i-- else i = diffs.length - 1
+  diffs[i] ? diffs[diffs.length - 1]
+diffAtLine = (diffs, line)-> diffs.find (d)-> -1 <= line - d.newStart < d.newLines
+
 module.exports = {
   processHunk
   gitApplyPatchToIndex
@@ -142,4 +150,7 @@ module.exports = {
   getPatch
   getReversePatch
   isDiffInRange
+  nextDiff
+  previousDiff
+  diffAtLine
 }
