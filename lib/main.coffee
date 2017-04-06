@@ -111,6 +111,15 @@ toggleLines = (editor, [first, last])->
   options =
     ignorePrecedingDeletion: atom.config.get 'git-diff-staged.ignorePrecedingDeletion'
     gitExecutable: getGitPath()
-  toggleStaged(repo.getRepo(file), file, text, first, last, options).then (result)->
+  toggleStaged(repo.getRepo(file), file, text, first, last, options)
+  .then (result)->
     return console.warn 'nothing to do' unless result?
     return console.error result.err.join '' if result.code isnt 0
+  .catch (err)->
+    console.error err.stack
+    console.log err.details.cmd
+    console.log err.details.out
+    console.error err.details.err
+    console.error err.details.patch
+    console.log err
+    atom.notifications.addError(err.message)

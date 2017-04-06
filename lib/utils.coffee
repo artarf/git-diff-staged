@@ -125,12 +125,14 @@ gitApplyPatchToIndex = (patch, dir, git = 'git')->
     options = ['apply', '--cached', '-v', '--unidiff-zero', '-']
     child = cp.spawn git, options, cwd: dir
     child.stdin.setEncoding('utf-8')
-    ret = err: [], out: [], cmd: git + ' ' + options.join ' '
+    ret = err: [], out: [], patch: patch, cmd: git + ' ' + options.join ' '
     child.stdout.on 'data', (chunk)-> ret.out.push ''+chunk
     child.stderr.on 'data', (chunk)-> ret.err.push ''+chunk
     child.on 'exit', (code, signal)->
       if code
-        reject Object.assign ret, {code, signal}
+        err = new Error "git execution returned " + code
+        err.details = Object.assign ret, {code, signal}
+        reject err
         # If you are listening to both the 'exit' and 'error' events,
         # it is important to guard against accidentally invoking handler
         # functions multiple times.
@@ -138,7 +140,8 @@ gitApplyPatchToIndex = (patch, dir, git = 'git')->
       else
         resolve Object.assign ret, {code, signal}
     child.on 'error', (err)->
-      reject Object.assign ret, {err}
+      err.details = ret
+      reject err
       reject = ->
     child.stdin.write patch
     child.stdin.end()
