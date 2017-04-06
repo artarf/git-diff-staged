@@ -46,7 +46,7 @@ class GitDiffStagedView
     @timeoutId = setTimeout(@updateDiffs, timeout)
 
   updateDiffs: =>
-    return if @editor.isDestroyed()
+    return unless @editor
 
     @removeDecorations()
     if @repository and path = @editor?.getPath()
