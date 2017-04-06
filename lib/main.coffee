@@ -98,7 +98,7 @@ getDiffs = (editor)-> repositoryForPath(editor.getPath()).getLineDiffs(editor.ge
 
 _getHunkLines = (editor, {row})->
   return [-1, -1] unless d = diffAtLine getDiffs(editor), row
-  return [d.newStart, d.newStart + d.newLines - 1]
+  return [d.newStart, d.newStart + d.newLines - (d.newLines isnt 0)]
 
 toggleLines = (editor, [first, last])->
   file = editor.getPath()
