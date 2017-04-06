@@ -1,5 +1,6 @@
 {CompositeDisposable} = require 'atom'
 toggleStaged = GitDiffStagedView = repositoryForPath = null
+repositoryForEditor = null
 {diffAtLine, previousDiff, nextDiff} = require "./utils"
 {Point} = require "atom"
 
@@ -11,6 +12,7 @@ getGitPath = ->
 module.exports =
   vimMode: null
   subscriptions: null
+  views: new WeakMap
 
   config:
     ignorePrecedingDeletion:
@@ -27,10 +29,11 @@ module.exports =
   activate: ->
     @subscriptions = new CompositeDisposable()
     GitDiffStagedView = require './git-diff-staged-view'
-    {repositoryForPath} = require './helpers'
+    repositoryForEditor = (editor)=> @views.get(editor)?.getRepositorySync()
     {toggleStaged} = require './utils'
     @subscriptions.add atom.workspace.observeTextEditors (editor)=>
-      @subscriptions.add new GitDiffStagedView(editor)
+      @views.set editor, view = new GitDiffStagedView(editor, this)
+      @subscriptions.add view
     @subscriptions.add atom.commands.add 'atom-text-editor', 'git-diff-staged:toggle-selected', ->
       editor = atom.workspace.getActiveTextEditor()
       toggleLines editor, getLines editor.getSelectedBufferRange()
@@ -94,7 +97,7 @@ getLines = ({start, end})-> [start.row + 1, end.row + (end.column > 0)]
 
 getHunkLines = (editor)-> _getHunkLines(editor, editor.getCursorBufferPosition())
 
-getDiffs = (editor)-> repositoryForPath(editor.getPath()).getLineDiffs(editor.getPath(), editor.getText())
+getDiffs = (editor)-> repositoryForEditor(editor)?.getLineDiffs(editor.getPath(), editor.getText())
 
 _getHunkLines = (editor, {row})->
   return [-1, -1] unless d = diffAtLine getDiffs(editor), row
@@ -102,7 +105,7 @@ _getHunkLines = (editor, {row})->
 
 toggleLines = (editor, [first, last])->
   file = editor.getPath()
-  return unless repo = repositoryForPath(file)
+  return unless repo = repositoryForEditor(editor)
   text = editor.getText()
   file = repo.relativize file
   options =
@@ -111,5 +114,3 @@ toggleLines = (editor, [first, last])->
   toggleStaged(repo.getRepo(file), file, text, first, last, options).then (result)->
     return console.warn 'nothing to do' unless result?
     return console.error result.err.join '' if result.code isnt 0
-    editorElement = atom.views.getView(editor)
-    atom.commands.dispatch(editorElement, 'git-diff-staged:update-diffs')

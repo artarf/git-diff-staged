@@ -1,4 +1,6 @@
-{CompositeDisposable} = require 'atom'
+fs = require 'fs'
+{join} = require 'path'
+{Directory, CompositeDisposable} = require 'atom'
 {repositoryForPath} = require './helpers'
 
 module.exports =
@@ -8,17 +10,12 @@ class GitDiffStagedView
     @editor = editor
 
     @subscriptions.add @editor.onDidChange(@scheduleUpdate)
-    @subscriptions.add @editor.onDidChangePath(@scheduleUpdate)
+    @subscriptions.add @editor.onDidChangePath(@subscribeToRepository)
 
     @subscribeToRepository()
     @subscriptions.add atom.project.onDidChangePaths @subscribeToRepository
 
     @subscriptions.add @editor.onDidDestroy @dispose
-
-    editorElement = atom.views.getView(editor)
-    @subscriptions.add atom.commands.add editorElement, 'git-diff-staged:update-diffs', @scheduleUpdate
-
-    @scheduleUpdate(100)
 
   reset: ->
     @subscriptions = new CompositeDisposable()
@@ -32,11 +29,28 @@ class GitDiffStagedView
     @subscriptions?.dispose()
     @reset()
 
+  getRepositorySync: -> @repository
   subscribeToRepository: =>
-    if @repository = repositoryForPath(@editor.getPath())
-      @subscriptions.add @repository.onDidChangeStatuses @scheduleUpdate
-      @subscriptions.add @repository.onDidChangeStatus (changedPath) =>
-        @scheduleUpdate() if changedPath is @editor.getPath()
+    @repository = null
+    dir = new Directory @editor.getDirectoryPath()
+    atom.project.repositoryForDirectory(dir).then (@repository)=>
+      return unless @repository
+      @relativePath = @repository.relativize(@editor.getPath())
+      # track the pathStatus to avoid unnecessary updates
+      @status = @repository.getPathStatus(@relativePath)
+      @subscriptions.add @repository.onDidChangeStatuses =>
+        current = @repository.getPathStatus(@relativePath)
+        if @status isnt current
+          @status = current
+          @scheduleUpdate()
+      @subscriptions.add @repository.onDidChangeStatus ({path, pathStatus})=>
+        return if path isnt @relativePath
+        @status = pathStatus
+        @scheduleUpdate()
+      @scheduleUpdate()
+      # Watch the directory because index is recreated on every change.
+      # Otherwise we loose the watch after the first change.
+      fs.watch join(@repository.path), (__, name)=> @scheduleUpdate() if name is 'index'
 
   cancelUpdate: ->
     clearTimeout(@timeoutId)
