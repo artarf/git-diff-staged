@@ -47,6 +47,7 @@ module.exports =
       @registerCommand()
       mutateSelection: (selection)->
         toggleLines selection.editor, getLines selection.getBufferRange()
+        return
 
     TextObject = Base.getClass "TextObject"
     class Hunk extends TextObject
