@@ -44,10 +44,9 @@ Operator to toggle staging status for a movement
 - `git-diff-staged:toggle-staged`
 
 TextObjects to operate with e.g. `toggle-staged` Operator.
-These all work identically.
+Both work identically.
 - `git-diff-staged:inner-hunk`
 - `git-diff-staged:a-hunk`
-- `git-diff-staged:hunk`
 
 Motions to move forward/backward by hunk(s)
 - `git-diff-staged:move-to-next-hunk`
@@ -70,7 +69,6 @@ Example keymap:
 'atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode':
   'i h': 'git-diff-staged:inner-hunk'
   'a h': 'git-diff-staged:a-hunk'
-  'g h': 'git-diff-staged:hunk'
  
 'atom-workspace atom-text-editor:not([mini]):not(.insert-mode).vim-mode-plus':
   'g s s': 'git-diff-staged:toggle-staged'

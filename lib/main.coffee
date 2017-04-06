@@ -53,7 +53,6 @@ module.exports =
       @commandPrefix: 'git-diff-staged'
       @deriveInnerAndA()
       wise: 'linewise'
-      @registerCommand()
       getRange: (selection)->
         editor = atom.workspace.getActiveTextEditor()
         diffs = getDiffs editor
