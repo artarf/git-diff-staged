@@ -7,8 +7,8 @@ class GitDiffStagedView
     @reset()
     @editor = editor
 
-    @subscriptions.add(@editor.onDidStopChanging(@updateDiffs))
-    @subscriptions.add(@editor.onDidChangePath(@updateDiffs))
+    @subscriptions.add @editor.onDidChange(@scheduleUpdate)
+    @subscriptions.add @editor.onDidChangePath(@scheduleUpdate)
 
     @subscribeToRepository()
     @subscriptions.add atom.project.onDidChangePaths @subscribeToRepository
@@ -18,13 +18,13 @@ class GitDiffStagedView
     editorElement = atom.views.getView(editor)
     @subscriptions.add atom.commands.add editorElement, 'git-diff-staged:update-diffs', @scheduleUpdate
 
-    @scheduleUpdate()
+    @scheduleUpdate(100)
 
   reset: ->
     @subscriptions = new CompositeDisposable()
     @decorations = {}
     @markers = []
-    @immediateId = @repository = @editor = null
+    @timeoutId = @repository = @editor = null
 
   dispose: =>
     @cancelUpdate()
@@ -39,11 +39,11 @@ class GitDiffStagedView
         @scheduleUpdate() if changedPath is @editor.getPath()
 
   cancelUpdate: ->
-    clearImmediate(@immediateId)
+    clearTimeout(@timeoutId)
 
-  scheduleUpdate: =>
+  scheduleUpdate: (timeout = 50)=>
     @cancelUpdate()
-    @immediateId = setImmediate(@updateDiffs)
+    @timeoutId = setTimeout(@updateDiffs, timeout)
 
   updateDiffs: =>
     return if @editor.isDestroyed()
