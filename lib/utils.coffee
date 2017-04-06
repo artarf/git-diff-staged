@@ -128,7 +128,18 @@ gitApplyPatchToIndex = (patch, dir, git = 'git')->
     ret = err: [], out: [], cmd: git + ' ' + options.join ' '
     child.stdout.on 'data', (chunk)-> ret.out.push ''+chunk
     child.stderr.on 'data', (chunk)-> ret.err.push ''+chunk
-    child.on 'exit', (code, signal)-> resolve Object.assign ret, {code, signal}
+    child.on 'exit', (code, signal)->
+      if code
+        reject Object.assign ret, {code, signal}
+        # If you are listening to both the 'exit' and 'error' events,
+        # it is important to guard against accidentally invoking handler
+        # functions multiple times.
+        reject = ->
+      else
+        resolve Object.assign ret, {code, signal}
+    child.on 'error', (err)->
+      reject Object.assign ret, {err}
+      reject = ->
     child.stdin.write patch
     child.stdin.end()
 
