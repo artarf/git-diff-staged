@@ -1,8 +1,9 @@
 @import "syntax-variables";
 
+@unconventional-color: @syntax-gutter-text-color-selected;
 atom-text-editor div.gutter {
-  // atom/git-diff package defines most of the styles
-  // here we add some styles to differentiate already staged lines
+  // atom/git-diff package defines styles for modified lines.
+  // Here we add some styles to differentiate already staged lines
   .line-number:not(.not-staged) {
     &.git-line-added {
       border-left-style: dotted;
@@ -11,7 +12,7 @@ atom-text-editor div.gutter {
       border-left-style: dotted;
     }
     &.git-line-removed:before {
-      border-left-color: pink;
+      border-left-color: lighten(@syntax-color-removed, 20%);
     }
     &.git-index-partial:before {
       @size: 4px;
@@ -22,7 +23,7 @@ atom-text-editor div.gutter {
       width: 0;
       content: " ";
       border: solid transparent;
-      border-left-color: white;
+      border-left-color: @unconventional-color;
       border-width: @size;
       margin-top: -@size;
       pointer-events: none;
@@ -31,11 +32,9 @@ atom-text-editor div.gutter {
   .line-number.not-staged.git-index-added.git-line-modified {
       border-left-color: @syntax-color-added;
   }
-  // these styles are for unconventional situations
-  // e.g. there is stuff in index that does not correspond current text
   .line-number.not-staged:not(.git-line-added):not(.git-line-removed):not(.git-line-modified) {
     &.git-index-added, &.git-index-modified {
-      border-left: 1px dotted white;
+      border-left: 1px dotted @unconventional-color;
       padding-left: ~"calc(0.5em - 2px)";
     }
     &.git-index-removed:before {
@@ -47,7 +46,7 @@ atom-text-editor div.gutter {
       width: 0;
       content: " ";
       border: solid transparent;
-      border-left-color: pink;
+      border-left-color: lighten(@syntax-color-removed, 20%);
       border-width: @size;
       margin-top: -@size;
       pointer-events: none;
