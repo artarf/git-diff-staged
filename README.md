@@ -2,6 +2,11 @@
 
 Marks staged lines in the gutter and allows moving partial hunks back and forth.
 
+Fixes some issues in other packages that rely on `atom.GitRepository.onDidChangeStatuses()`
+(tree-view and git-diff for example).
+It does not detect all status changes, but this package notifies it of every missing
+index change.
+
 ## Installation
 
 ```
@@ -38,7 +43,7 @@ staging it and then undoing the change.
   variation uses the hunk surrounding cursor, if there are changes
   at that position.
   
-Also adds a some vim-mode-plus stuff
+## vim-mode-plus stuff
 
 Operator to toggle staging status for a movement
 - `git-diff-staged:toggle-staged`
