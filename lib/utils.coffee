@@ -66,6 +66,7 @@ isDiffInRange = (first, last, ignorePrecedingDeletion)-> (d)->
     first <= d.newLineNumber <= last
   else if d.newLines is 0
     # plain deletion, newStart points to existing line before deletion
+    first = 0 if first is 1
     first <= d.newStart <= last
   else
     # modification, newStart points to first +line
@@ -152,7 +153,7 @@ previousDiff = (diffs, line)->
   i = nextDiffIndex(diffs, line - 1)
   if ~i then i-- else i = diffs.length - 1
   diffs[i] ? diffs[diffs.length - 1]
-diffAtLine = (diffs, line)-> diffs.find (d)-> -1 <= line - d.newStart < d.newLines
+diffAtLine = (diffs, line)-> diffs.find (d)-> -1 <= line - d.newStart < d.newLines + (line is 0)
 
 module.exports = {
   processHunk
