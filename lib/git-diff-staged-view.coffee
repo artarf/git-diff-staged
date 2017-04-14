@@ -1,4 +1,5 @@
 fs = require 'fs'
+{join} = require 'path'
 {Directory, CompositeDisposable} = require 'atom'
 {repositoryForPath} = require './helpers'
 
@@ -49,13 +50,16 @@ class GitDiffStagedView
         @status = pathStatus
         @scheduleUpdate()
       @scheduleUpdate()
-      # Watch the directory because index is recreated on every change.
-      # Otherwise we loose the watch after the first change.
-      @indexWatch = fs.watch @repository.path, (__, name)=>
-        # atom/git-utils Repository does not always detect index changes
-        # ... let others know (e.g. tree-view)
-        @repository?.refreshStatus()
-        @scheduleUpdate() if name is 'index'
+      @addIndexWatch()
+
+  addIndexWatch: ->
+    @indexWatch?.close()
+    @indexWatch = fs.watch join(@repository.path, 'index'), =>
+      # atom/git-utils Repository does not always detect index changes
+      # ... let others know (e.g. tree-view)
+      @repository?.refreshStatus()
+      @scheduleUpdate()
+      @addIndexWatch()
 
   cancelUpdate: ->
     clearTimeout(@timeoutId)
