@@ -153,7 +153,8 @@ previousDiff = (diffs, line)->
   i = nextDiffIndex(diffs, line - 1)
   if ~i then i-- else i = diffs.length - 1
   diffs[i] ? diffs[diffs.length - 1]
-diffAtLine = (diffs, line)-> diffs.find (d)-> -1 <= line - d.newStart < d.newLines + (line is 0)
+diffAtLine = (diffs, line)-> diffs.find (d)->
+  -1 <= line - d.newStart < d.newLines - (d.newLines > 0) + (line is 0)
 
 module.exports = {
   processHunk
