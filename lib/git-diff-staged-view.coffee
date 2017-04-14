@@ -37,6 +37,7 @@ class GitDiffStagedView
     return unless dir = @editor.getDirectoryPath()
     atom.project.repositoryForDirectory(new Directory dir).then (@repository)=>
       return unless @repository
+      atom.views.getView(@editor).classList.add 'git'
       @relativePath = @repository.relativize(@editor.getPath())
       # track the pathStatus to avoid unnecessary updates
       @status = @repository.getPathStatus(@relativePath)

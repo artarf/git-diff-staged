@@ -34,10 +34,10 @@ module.exports =
     @subscriptions.add atom.workspace.observeTextEditors (editor)=>
       @views.set editor, view = new GitDiffStagedView(editor, this)
       @subscriptions.add view
-    @subscriptions.add atom.commands.add 'atom-text-editor', 'git-diff-staged:toggle-selected', ->
+    @subscriptions.add atom.commands.add 'atom-text-editor.git', 'git-diff-staged:toggle-selected', ->
       editor = atom.workspace.getActiveTextEditor()
       toggleLines editor, getLines editor.getSelectedBufferRange()
-    @subscriptions.add atom.commands.add 'atom-text-editor', 'git-diff-staged:toggle-hunk-at-cursor', ->
+    @subscriptions.add atom.commands.add 'atom-text-editor.git', 'git-diff-staged:toggle-hunk-at-cursor', ->
       editor = atom.workspace.getActiveTextEditor()
       toggleLines editor, getHunkLines editor
   deactivate: -> @subscriptions.dispose()
