@@ -34,8 +34,8 @@ class GitDiffStagedView
   getRepositorySync: -> @repository
   subscribeToRepository: =>
     @repository = null
-    dir = new Directory @editor.getDirectoryPath()
-    atom.project.repositoryForDirectory(dir).then (@repository)=>
+    return unless dir = @editor.getDirectoryPath()
+    atom.project.repositoryForDirectory(new Directory dir).then (@repository)=>
       return unless @repository
       @relativePath = @repository.relativize(@editor.getPath())
       # track the pathStatus to avoid unnecessary updates
