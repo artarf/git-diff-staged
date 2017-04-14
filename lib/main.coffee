@@ -100,7 +100,8 @@ getHunkLines = (editor)-> _getHunkLines(editor, editor.getCursorBufferPosition()
 getDiffs = (editor)-> repositoryForEditor(editor)?.getLineDiffs(editor.getPath(), editor.getText())
 
 _getHunkLines = (editor, {row})->
-  return [-1, -1] unless d = diffAtLine getDiffs(editor), row
+  return [-1, -1] unless d = getDiffs(editor)
+  return [-1, -1] unless d = diffAtLine d, row
   return [d.newStart, d.newStart + d.newLines - (d.newLines isnt 0)]
 
 toggleLines = (editor, [first, last])->

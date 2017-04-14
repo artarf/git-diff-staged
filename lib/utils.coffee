@@ -17,7 +17,7 @@ cp = require 'child_process'
 #   gitExecutable (git):
 #      path to git executable as needed by nodejs child_process.spawn()
 toggleStaged = (repo, file, text, first, last, options = {})->
-  diffs = repo.getLineDiffDetails(file, text, useIndex: true)
+  return Promise.resolve() unless diffs = repo.getLineDiffDetails(file, text, useIndex: true)
   unless patch = getPatch(repo, file, first, last, diffs, options)
     patch = getReversePatch(repo, file, first, last, diffs, options)
   return Promise.resolve() unless patch
