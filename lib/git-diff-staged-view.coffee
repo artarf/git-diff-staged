@@ -55,7 +55,7 @@ class GitDiffStagedView
 
   addIndexWatch: ->
     @indexWatch?.close()
-    @indexWatch = fs.watch join(@repository.path, 'index'), =>
+    @indexWatch = fs.watch join(@repository.getPath(), 'index'), =>
       # atom/git-utils Repository does not always detect index changes
       # ... let others know (e.g. tree-view)
       @repository?.refreshStatus()
