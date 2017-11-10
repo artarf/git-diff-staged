@@ -1,8 +1,7 @@
 {CompositeDisposable} = require 'atom'
 toggleStaged = GitDiffStagedView = repositoryForPath = null
 repositoryForEditor = null
-{diffAtLine, previousDiff, nextDiff} = require "./utils"
-{Point} = require "atom"
+{diffAtLine} = require "./utils"
 
 getGitPath = ->
   git = atom.config.get("git-diff-staged.gitPath")
@@ -43,55 +42,7 @@ module.exports =
   deactivate: -> @subscriptions.dispose()
 
   consumeVimModePlus: (@vimMode)->
-    {Base} = @vimMode
-    Operator = Base.getClass "Operator"
-    class ToggleStaged extends Operator
-      @commandPrefix: 'git-diff-staged'
-      @registerCommand()
-      mutateSelection: (selection)->
-        toggleLines selection.editor, getLines selection.getBufferRange()
-        return
-
-    TextObject = Base.getClass "TextObject"
-    class Hunk extends TextObject
-      @commandPrefix: 'git-diff-staged'
-      @deriveInnerAndA()
-      wise: 'linewise'
-      getRange: (selection)->
-        editor = atom.workspace.getActiveTextEditor()
-        diffs = getDiffs editor
-        return unless diffs?.length
-        [start, end] = _getHunkLines editor, pos = @getCursorPositionForSelection(selection)
-        return if start is -1
-        @getBufferRangeForRowRange [start-1, end-1]
-    Base.getClass("InnerHunk").registerCommand()
-    Base.getClass("AHunk").registerCommand()
-
-    Motion = Base.getClass "Motion"
-    class MoveToNextHunk extends Motion
-      @commandPrefix: 'git-diff-staged'
-      @registerCommand()
-      jump: true
-      direction: 'next'
-      getPoint: (fromPoint)->
-        editor = atom.workspace.getActiveTextEditor()
-        diffs = getDiffs editor
-        return unless diffs?.length
-        row = fromPoint.row + 1
-        if @direction is 'next'
-          d = nextDiff diffs, row
-          new Point d.newStart - 1, 0
-        else
-          d = previousDiff diffs, row
-          new Point d.newStart - 1, 0
-
-      moveCursor: (cursor)->
-        @moveCursorCountTimes cursor, =>
-          @setBufferPositionSafely(cursor, @getPoint(cursor.getBufferPosition()))
-
-    class MoveToPreviousHunk extends MoveToNextHunk
-      @registerCommand()
-      direction: 'previous'
+    require("./vim-mode-classes") _getHunkLines, getLines, toggleLines, getDiffs, @vimMode.Base
 
 getLines = ({start, end})-> [start.row + 1, end.row + (end.column > 0)]
 
