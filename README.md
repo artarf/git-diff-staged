@@ -16,7 +16,7 @@ apm install git-diff-staged
 ## Styles
 
 This plugin extends styles in core package [git-diff](https://atom.io/packages/git-diff).
-Visual distinction is implemented only with no icons (`Show Icons In Editor Gutter` disabled), 
+Visual distinction is implemented only with no icons (`Show Icons In Editor Gutter` disabled),
 i.e. with the left borders and small triangles.
 
 Staged changes are indicated with dotted left borders.
@@ -24,9 +24,8 @@ Staged deletions are marked by changing the color of the triangle.
 
 Inconsistencies between index and current file are marked
 with white color and dotted thinner border.
+You can see this when you stage a change and then undo it.
 You can correct these by toggling the staged state.
-This kind of phenomenom can be reproduced by making a change,
-staging it and then undoing the change.
 
 ## Commands
 
@@ -36,13 +35,13 @@ staging it and then undoing the change.
   all changed lines already are in index, in which case
   they are removed from index.
   If selection contains no changes, staged or not, nothing is done.
-  
+
 - `git-diff-staged:toggle-hunk-at-cursor`
 
   Similar to `toggle-selected`, instead of selected lines this
   variation uses the hunk surrounding cursor, if there are changes
   at that position.
-  
+
 ## vim-mode-plus stuff
 
 Operator to toggle staging status for a movement
@@ -74,7 +73,7 @@ Example keymap:
 'atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode':
   'i h': 'git-diff-staged:inner-hunk'
   'a h': 'git-diff-staged:a-hunk'
- 
+
 'atom-workspace atom-text-editor:not([mini]):not(.insert-mode).vim-mode-plus':
   'g s s': 'git-diff-staged:toggle-staged'
   'g s j': 'git-diff-staged:move-to-next-hunk'
