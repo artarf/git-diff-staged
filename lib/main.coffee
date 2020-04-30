@@ -41,7 +41,7 @@ module.exports =
   deactivate: -> @subscriptions.dispose()
 
   consumeVimModePlus: (@vimMode)->
-    require("./vim-mode-classes") _getHunkLines, getLines, toggleLines, getDiffs, @vimMode.Base
+    require("./vim-mode-classes") _getHunkLines, getLines, toggleLines, getDiffs, @vimMode
 
 getLines = ({start, end})-> [start.row + 1, end.row + (end.column > 0)]
 
