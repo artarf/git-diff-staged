@@ -1,4 +1,4 @@
-fs = require 'fs'
+{watchPath} = require('atom')
 {join} = require 'path'
 {Directory, CompositeDisposable} = require 'atom'
 {repositoryForPath} = require './helpers'
@@ -21,13 +21,11 @@ class GitDiffStagedView
     @subscriptions = new CompositeDisposable()
     @decorations = {}
     @markers = []
-    @indexWatch = null
     @timeoutId = @repository = @editor = null
 
   dispose: =>
     @cancelUpdate()
     @removeDecorations()
-    @indexWatch?.close()
     @subscriptions?.dispose()
     @reset()
 
@@ -54,13 +52,15 @@ class GitDiffStagedView
       @addIndexWatch()
 
   addIndexWatch: ->
-    @indexWatch?.close()
-    @indexWatch = fs.watch join(@repository.getPath(), 'index'), =>
-      # atom/git-utils Repository does not always detect index changes
-      # ... let others know (e.g. tree-view)
-      @repository?.refreshStatus()
-      @scheduleUpdate()
-      @addIndexWatch()
+    return unless @repository
+    indexFile = join(@repository.getPath(), 'index.lock')
+    promise = watchPath @repository.getPath(), {}, (events)=>
+      for e in events when e.path is indexFile
+        @scheduleUpdate()
+        break
+      return
+    promise.then (disposable)=>
+      @subscriptions.add disposable
 
   cancelUpdate: ->
     clearTimeout(@timeoutId)
