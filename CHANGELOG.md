@@ -1,3 +1,9 @@
+## 0.4.2 - 0.4.4
+- Fix: a vim-mode-plus feature deprecation
+- Change: use atom.watchPath to detect changes in .git/index
+- Fix: [#3](https://github.com/artarf/git-diff-staged/issues/3)
+  Changes in vim-mode-plus 1.18.0 break vim operations
+
 ## 0.4.1 - fix bugs
 - #1
 - Sometimes null reference when opening a pristine repo (no commits yet).
