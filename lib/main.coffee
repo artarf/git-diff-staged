@@ -1,7 +1,6 @@
 {CompositeDisposable} = require 'atom'
 toggleStaged = GitDiffStagedView = repositoryForPath = null
 repositoryForEditor = null
-{diffAtLine} = require "./utils"
 
 getGitPath = ->
   git = atom.config.get("git-diff-staged.gitPath")
@@ -52,6 +51,7 @@ getDiffs = (editor)-> repositoryForEditor(editor)?.getLineDiffs(editor.getPath()
 
 _getHunkLines = (editor, {row})->
   return [-1, -1] unless d = getDiffs(editor)
+  {diffAtLine} = require "./utils"
   return [-1, -1] unless d = diffAtLine d, row
   return [d.newStart, d.newStart + d.newLines - (d.newLines isnt 0)]
 
